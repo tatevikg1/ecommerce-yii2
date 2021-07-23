@@ -45,8 +45,8 @@ class Product extends \yii\db\ActiveRecord
             [['status', 'created_at', 'updated_at', 'created_by', 'updated_by'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['image'], 'string', 'max' => 2000],
-            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
-            [['updated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_by' => 'id']],
+            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['created_by' => 'id']],
+            [['updated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['updated_by' => 'id']],
         ];
     }
 
@@ -59,9 +59,9 @@ class Product extends \yii\db\ActiveRecord
             'id' => 'ID',
             'name' => 'Name',
             'description' => 'Description',
-            'image' => 'Image',
+            'image' => 'Product Image',
             'price' => 'Price',
-            'status' => 'Status',
+            'status' => 'Published',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'created_by' => 'Created By',
@@ -76,7 +76,7 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getCartItems()
     {
-        return $this->hasMany(CartItems::className(), ['product_id' => 'id']);
+        return $this->hasMany(CartItems::class, ['product_id' => 'id']);
     }
 
     /**
@@ -86,7 +86,7 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getOrderItems()
     {
-        return $this->hasMany(OrderItems::className(), ['product_id' => 'id']);
+        return $this->hasMany(OrderItems::class, ['product_id' => 'id']);
     }
 
     /**
@@ -96,7 +96,7 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getCreatedBy()
     {
-        return $this->hasOne(User::className(), ['id' => 'created_by']);
+        return $this->hasOne(User::class, ['id' => 'created_by']);
     }
 
     /**
@@ -106,7 +106,7 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getUpdatedBy()
     {
-        return $this->hasOne(User::className(), ['id' => 'updated_by']);
+        return $this->hasOne(User::class, ['id' => 'updated_by']);
     }
 
     /**
