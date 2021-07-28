@@ -45,10 +45,22 @@ AppAsset::register($this);
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         } else {
             $menuItems[] = [
-                'label' => 'Logout(' . Yii::$app->user->identity->getDisplayName() . ')',
-                'url' => ['/site/logout'],
-                'linkOptions' => [
-                    'data-method' => 'post'
+                'label' => Yii::$app->user->identity->getDisplayName(),
+                // 'dropDownOptions' => [
+                //     'class' => 'dropdown-menu-right'
+                // ],
+                'items' => [
+                    [
+                        'label' => 'Profile',
+                        'url' => ['/profile/index'],
+                    ],
+                    [
+                        'label' => 'Logout',
+                        'url' => ['/site/logout'],
+                        'linkOptions' => [
+                            'data-method' => 'post'
+                        ],
+                    ]
                 ]
             ];
         }
