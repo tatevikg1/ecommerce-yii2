@@ -12,6 +12,8 @@ use yii\web\IdentityInterface;
  *
  * @property integer $id
  * @property string $username
+ * @property string $firstname
+ * @property string $lastname
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $verification_token
@@ -43,7 +45,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function behaviors()
     {
         return [
-            TimestampBehavior::className(),
+            TimestampBehavior::class,
         ];
     }
 
@@ -208,5 +210,11 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+
+    public function getDisplayName()
+    {
+        $fullname = trim($this->lastname . ' ' . $this->firstname);
+        return $fullname ? : $this->username;
     }
 }
