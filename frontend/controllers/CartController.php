@@ -54,7 +54,7 @@ class CartController extends Controller
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest) {
-            // $cartItems = ;
+            $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
         } else {
             // $cartItems = CartItem::find()->userId(Yii::$app->user->id)->all();
             $cartItems = CartItem::findBySql(
@@ -88,7 +88,32 @@ class CartController extends Controller
         }
 
         if (Yii::$app->user->isGuest) {
-            //
+            
+            $found = false;
+            $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+
+            foreach($cartItems as &$cartItem){
+                if($cartItem['id'] == $id){
+                    $found = true;
+                    $cartItem['quantity']++;
+                    break;
+                }
+            }
+
+            if(!$found){
+                $cartItem = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'image' => $product->image,
+                    'price' => $product->price,
+                    'quantity' => 1,
+                    'total_price' => $product->price
+                ];    
+                $cartItems[] = $cartItem;
+            }
+
+            Yii::$app->session->set(CartItem::SESSION_KEY, $cartItems);
+
         } else {
             $userId = Yii::$app->user->id;
 
