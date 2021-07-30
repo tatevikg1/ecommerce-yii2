@@ -3,6 +3,7 @@
 /** @var $model \common\models\Product */
 
 use yii\helpers\StringHelper;
+use yii\helpers\Url;
 
 ?>
 
@@ -26,7 +27,7 @@ use yii\helpers\StringHelper;
     </div>
 
     <div class="card-footer text-right">
-        <a class="btn btn-primary" href="#">
+        <a class="btn btn-primary btn-add-to-cart" href="<?= Url::to(['/cart/add']) ?>">
             Add to Cart
          </a>
     </div>

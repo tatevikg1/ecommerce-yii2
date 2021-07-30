@@ -10,6 +10,8 @@ use yii\bootstrap4\Breadcrumbs;
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
 
+$cartItemCount = $this->params['cartItemParam'];
+
 AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
@@ -38,7 +40,13 @@ AppAsset::register($this);
             ],
         ]);
         $menuItems = [
-            ['label' => 'Home', 'url' => ['/site/index']],
+            [
+                'label' => 'Cart <span id="cart-quantity" class="badge badge-danger">'.$cartItemCount.'</span>', 
+                'url' => ['/cart/index'],
+                'encode' => false
+            ],
+
+
         ];
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
