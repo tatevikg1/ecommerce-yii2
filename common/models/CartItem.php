@@ -80,4 +80,26 @@ class CartItem extends \yii\db\ActiveRecord
     {
         return new \common\models\query\CartItemQuery(get_called_class());
     }
+
+    public static function getTotalQuantityForUser($userId)
+    {
+
+        $cartItemCount = CartItem::findBySql(
+            " SELECT SUM(quantity) FROM cart_items WHERE created_by = :userId ",
+            ['userId' => $userId]
+        )->scalar();
+
+        return $cartItemCount;
+    }
+
+    public static function getTotalQuantityForGuest()
+    {
+        $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+        $cartItemCount = 0;
+        foreach ($cartItems as $cartItem) {
+            $cartItemCount += $cartItem['quantity'];
+        }
+
+        return $cartItemCount;
+    }
 }

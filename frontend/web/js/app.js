@@ -21,4 +21,28 @@ $(function(){
             }
         })
     })
+
+
+    const $itemCuantities = $('.item-quantity');
+
+    $itemCuantities.change(ev => {
+
+        const $this = $(ev.target);
+        const $tr = $this.closest('tr');
+        const id = $tr.data('id');
+
+        $.ajax({
+            method: 'POST',
+            url:    $tr.data('url'),
+            data: {
+                id,
+                quantity: $this.val()
+            },
+            success: function(res){
+                console.log(res.totalQuantity)
+                $cartCuantity.text(res.totalQuantity)
+            }
+        })
+
+    })
 })
