@@ -29,13 +29,18 @@ use yii\helpers\Url;
             </thead>
             <tbody>
                 <?php foreach ($cartItems as $cartItem) : ?>
-                    <tr>
+                    <tr data-id="<?= $cartItem['id'] ?>" data-url="<?= Url::to(['/cart/update']) ?>">
                         <td><?= $cartItem['name'] ?></td>
                         <td>
                             <img src="<?= Product::displayImage($cartItem['image']) ?>" alt="<?= $cartItem['name'] ?>" style="width:50px">
                         </td>
                         <td><?= Yii::$app->formatter->asCurrency($cartItem['price']) ?></td>
-                        <td><?= $cartItem['quantity'] ?></td>
+                        <td>
+                            <input type="number" min="1" 
+                                value="<?= $cartItem['quantity'] ?>" 
+                                style="max-width:65px" 
+                                class="form-control item-quantity">
+                        </td>
                         <td><?= Yii::$app->formatter->asCurrency($cartItem['total_price']) ?></td>
                         <td><?= Html::a('Delete', ['/cart/delete', 'id' => $cartItem['id']], [
                                 'class' => 'btn btn-outline-danger btn-sm',
