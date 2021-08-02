@@ -71,14 +71,14 @@ class SiteController extends Controller
     public function actionLogin()
     {
         if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+            return $this->response->redirect('/site/index');
         }
 
         $this->layout = 'blank';
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+            return $this->response->redirect('/site/index');
         } else {
             $model->password = '';
 
@@ -97,7 +97,8 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
 
-        return $this->goHome();
+        return $this->response->redirect('login');
+
     }
 
     public function actionForgotPassword()
