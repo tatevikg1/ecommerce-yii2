@@ -7,5 +7,6 @@ function isGuest()
 
 function auth()
 {
-    return Yii::$app->user;
+    return Yii::$app->user->identity;
 }
+

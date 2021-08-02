@@ -23,6 +23,8 @@ use Yii;
  */
 class Order extends \yii\db\ActiveRecord
 {
+
+    const STATUS_DRAFT = 0;
     /**
      * {@inheritdoc}
      */
@@ -71,7 +73,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getOrderAddresses()
     {
-        return $this->hasOne(OrderAddresses::className(), ['order_id' => 'id']);
+        return $this->hasOne(OrderAddress::class, ['order_id' => 'id']);
     }
 
     /**
@@ -81,7 +83,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getOrderItems()
     {
-        return $this->hasMany(OrderItems::className(), ['order_id' => 'id']);
+        return $this->hasMany(OrderItem::class, ['order_id' => 'id']);
     }
 
     /**
@@ -91,7 +93,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getCreatedBy()
     {
-        return $this->hasOne(User::className(), ['id' => 'created_by']);
+        return $this->hasOne(User::class, ['id' => 'created_by']);
     }
 
     /**

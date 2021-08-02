@@ -102,4 +102,47 @@ class CartItem extends \yii\db\ActiveRecord
 
         return $cartItemCount;
     }
+
+    public static function getCartItemsForUser($userId)
+    {
+        return CartItem::findBySql(
+            "SELECT 
+                c.product_id AS id, 
+                p.price * c.quantity AS total_price,
+                p.image, 
+                p.name, 
+                p.price, 
+                c.quantity
+            FROM cart_items c
+                LEFT JOIN products p ON p.id = c.product_id
+            WHERE c.created_by = :userId",
+            ['userId' => $userId]
+        )->asArray()->all();
+    }
+
+    public static function getTotalPriceForUser($userId)
+    {
+        $cartItemCount = CartItem::findBySql(
+            " SELECT SUM(c.quantity * p.price) 
+                FROM cart_items c
+                LEFT JOIN products p on p.id = c.product_id
+            WHERE c.created_by = :userId ",
+            ['userId' => $userId]
+        )->scalar();
+
+        return $cartItemCount;
+    }
+
+
+    public static function getTotalPriceForGuest()
+    {
+        $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+        $cartItemCount = 0;
+        foreach ($cartItems as $cartItem) {
+            $cartItemCount += ($cartItem['quantity'] * $cartItem['price']);
+        }
+
+        return $cartItemCount;
+    }
+
 }

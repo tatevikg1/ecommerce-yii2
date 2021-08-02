@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\CartItem;
+use common\models\Order;
+use common\models\OrderAddress;
 use common\models\Product;
 use Yii;
 use yii\filters\ContentNegotiator;
@@ -57,20 +59,7 @@ class CartController extends Controller
         if (Yii::$app->user->isGuest) {
             $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
         } else {
-            // $cartItems = CartItem::find()->userId(Yii::$app->user->id)->all();
-            $cartItems = CartItem::findBySql(
-                "SELECT 
-                    c.product_id AS id, 
-                    p.price * c.quantity AS total_price,
-                    p.image, 
-                    p.name, 
-                    p.price, 
-                    c.quantity
-                FROM cart_items c
-                    LEFT JOIN products p ON p.id = c.product_id
-                WHERE c.created_by = :userId",
-                ['userId' => Yii::$app->user->id]
-            )->asArray()->all();
+            $cartItems = CartItem::getCartItemsForUser(auth()->id);
         }
 
         return $this->render('index', [
@@ -148,7 +137,22 @@ class CartController extends Controller
     {
         $id = Yii::$app->request->get('id');
 
-        $this->deleteCartItem($id);
+        if (!isGuest()) {
+
+            CartItem::deleteAll(['product_id' => $id, 'created_by' => Yii::$app->user->id]);
+            return $this->response->redirect('index');
+        }
+
+        $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+
+        foreach ($cartItems as $key => $cartItem) {
+            if ($cartItem['id'] == $id) {
+                array_splice($cartItems, $key, 1);
+                break;
+            }
+        }
+
+        Yii::$app->session->set(CartItem::SESSION_KEY, $cartItems);
 
         return $this->response->redirect('index');
     }
@@ -163,7 +167,7 @@ class CartController extends Controller
             throw new NotFoundHttpException('product not found');
         }
 
-        if($quantity < 1){
+        if ($quantity < 1) {
             return;
         }
 
@@ -198,21 +202,43 @@ class CartController extends Controller
         }
     }
 
-    protected function deleteCartItem($id)
+    public function actionCheckout()
     {
-        if (Yii::$app->user->isGuest) {
-            $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+        $order = new Order();
+        $orderAddress = new OrderAddress();
 
-            foreach ($cartItems as $key => $cartItem) {
-                if ($cartItem['id'] == $id) {
-                    array_splice($cartItems, $key, 1);
-                    break;
-                }
-            }
+        if (!isGuest()) {
+            $user = auth();
+            $userAddress = $user->getAddress();
 
-            Yii::$app->session->set(CartItem::SESSION_KEY, $cartItems);
+            $order->firstname = $user->firstname;
+            $order->lastname = $user->lastname;
+            $order->email = $user->email;
+            $order->status = Order::STATUS_DRAFT;
+
+            $orderAddress->address = $userAddress->address;
+            $orderAddress->city = $userAddress->city;
+            $orderAddress->state = $userAddress->state;
+            $orderAddress->country = $userAddress->country;
+            $orderAddress->zipcode = $userAddress->zipcode;
+
+            $cartItems = CartItem::getCartItemsForUser($user->id);
+            $productQuantuty = CartItem::getTotalQuantityForUser($user->id);
+            $totalPrice = CartItem::getTotalPriceForUser(auth()->id);
         } else {
-            CartItem::deleteAll(['product_id' => $id, 'created_by' => Yii::$app->user->id]);
+            $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+            $productQuantuty = CartItem::getTotalQuantityForGuest();
+            $totalPrice = CartItem::getTotalPriceForGuest();
+
         }
+
+
+        return $this->render('checkout', [
+            'order' => $order,
+            'orderAddress' => $orderAddress,
+            'cartItems' => $cartItems,
+            'productQuantity' => $productQuantuty,
+            'totalPrice' => $totalPrice
+        ]);
     }
 }
