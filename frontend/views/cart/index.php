@@ -52,7 +52,7 @@ use yii\helpers\Url;
             </tbody>
         </table>
         <div class="card-body text-right">
-        <a href="<?= Url::to(['/cart/checkout']) ?>"    
+        <a href="<?= Url::to(['/order/checkout']) ?>"    
             class="btn btn-primary"
             data-method="post">
                 Checkout

@@ -25,6 +25,9 @@ AppAsset::register($this);
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
 </head>
 
 <body>
@@ -41,7 +44,7 @@ AppAsset::register($this);
         ]);
         $menuItems = [
             [
-                'label' => 'Cart <span id="cart-quantity" class="badge badge-danger">'.$cartItemCount.'</span>', 
+                'label' => 'Cart <span id="cart-quantity" class="badge badge-danger">' . $cartItemCount . '</span>',
                 'url' => ['/cart/index'],
                 'encode' => false
             ],

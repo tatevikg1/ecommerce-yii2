@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\db\Exception;
 
 /**
  * This is the model class for table "{{%orders}}".
@@ -17,14 +18,17 @@ use Yii;
  * @property int|null $created_at
  * @property int|null $created_by
  *
- * @property OrderAddresses $orderAddresses
- * @property OrderItems[] $orderItems
+ * @property OrderAddress $orderAddress
+ * @property OrderItem[] $orderItems
  * @property User $createdBy
  */
 class Order extends \yii\db\ActiveRecord
 {
 
     const STATUS_DRAFT = 0;
+    const STATUS_COMPLETED = 1;
+    const STATUS_FAILED = 2;
+
     /**
      * {@inheritdoc}
      */
@@ -44,7 +48,7 @@ class Order extends \yii\db\ActiveRecord
             [['status', 'created_at', 'created_by'], 'integer'],
             [['firstname', 'lastname'], 'string', 'max' => 45],
             [['email', 'transaction_id'], 'string', 'max' => 255],
-            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
+            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['created_by' => 'id']],
         ];
     }
 
@@ -67,11 +71,11 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[OrderAddresses]].
+     * Gets query for [[OrderAddress]].
      *
-     * @return \yii\db\ActiveQuery|\common\models\query\OrderAddressesQuery
+     * @return \yii\db\ActiveQuery|\common\models\query\OrderAddressQuery
      */
-    public function getOrderAddresses()
+    public function getOrderAddress()
     {
         return $this->hasOne(OrderAddress::class, ['order_id' => 'id']);
     }
@@ -103,5 +107,30 @@ class Order extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\OrderQuery(get_called_class());
+    }
+
+    public function saveOrderItems()
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+
+        $cartItems = CartItem::getCartItemsForUser();
+
+        foreach ($cartItems as $cartItem) {
+            $orderItem = new OrderItem();
+            $orderItem->product_name = $cartItem['name'];
+            $orderItem->product_id = $cartItem['id'];
+            $orderItem->unit_price = $cartItem['price'];
+            $orderItem->order_id = $this->id;
+            $orderItem->quantity = $cartItem['quantity'];
+
+            if (!$orderItem->save()) {
+                $transaction->rollBack();
+                throw new Exception('Order item was not saved') . implode('<br>', $orderItem->getFirstErrors());
+            }
+        }
+
+        $transaction->commit();
+
+        return true;
     }
 }
