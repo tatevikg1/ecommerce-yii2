@@ -81,30 +81,34 @@ class CartItem extends \yii\db\ActiveRecord
         return new \common\models\query\CartItemQuery(get_called_class());
     }
 
-    public static function getTotalQuantityForUser($userId)
+    public static function getTotalQuantityForUser()
     {
+        if (isGuest()) {
+            $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+            $cartItemCount = 0;
+            foreach ($cartItems as $cartItem) {
+                $cartItemCount += $cartItem['quantity'];
+            }
+
+            return $cartItemCount;
+        }
 
         $cartItemCount = CartItem::findBySql(
             " SELECT SUM(quantity) FROM cart_items WHERE created_by = :userId ",
-            ['userId' => $userId]
+            ['userId' => auth()->id]
         )->scalar();
 
         return $cartItemCount;
     }
 
-    public static function getTotalQuantityForGuest()
+
+    public static function getCartItemsForUser()
     {
-        $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
-        $cartItemCount = 0;
-        foreach ($cartItems as $cartItem) {
-            $cartItemCount += $cartItem['quantity'];
+        if (isGuest()) {
+
+            return Yii::$app->session->get(CartItem::SESSION_KEY, []);
         }
 
-        return $cartItemCount;
-    }
-
-    public static function getCartItemsForUser($userId)
-    {
         return CartItem::findBySql(
             "SELECT 
                 c.product_id AS id, 
@@ -116,33 +120,38 @@ class CartItem extends \yii\db\ActiveRecord
             FROM cart_items c
                 LEFT JOIN products p ON p.id = c.product_id
             WHERE c.created_by = :userId",
-            ['userId' => $userId]
+            ['userId' => auth()->id]
         )->asArray()->all();
     }
 
-    public static function getTotalPriceForUser($userId)
+    public static function getTotalPriceForUser()
     {
-        $cartItemCount = CartItem::findBySql(
+        if (isGuest()) {
+            $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
+            $cartItemsTotalPrice = 0;
+            foreach ($cartItems as $cartItem) {
+                $cartItemsTotalPrice += ($cartItem['quantity'] * $cartItem['price']);
+            }
+
+            return $cartItemsTotalPrice;
+        }
+        $cartItemsTotalPrice = CartItem::findBySql(
             " SELECT SUM(c.quantity * p.price) 
                 FROM cart_items c
                 LEFT JOIN products p on p.id = c.product_id
             WHERE c.created_by = :userId ",
-            ['userId' => $userId]
+            ['userId' => auth()->id]
         )->scalar();
 
-        return $cartItemCount;
+        return $cartItemsTotalPrice;
     }
 
-
-    public static function getTotalPriceForGuest()
+    public static function clearCartItemsForUser()
     {
-        $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
-        $cartItemCount = 0;
-        foreach ($cartItems as $cartItem) {
-            $cartItemCount += ($cartItem['quantity'] * $cartItem['price']);
+        if (isGuest()) {
+            Yii::$app->session->remove(CartItem::SESSION_KEY);
+        } else {
+            CartItem::deleteAll(['created_by' => auth()->id]);
         }
-
-        return $cartItemCount;
     }
-
 }
