@@ -110,15 +110,20 @@ use yii\helpers\Url;
             return actions.order.capture().then(function(details) {
 
                 const $form = $('#checkout-form');
-                const data = $form.serializeArray();
-                data.push({
+                const formData= $form.serializeArray();
+                formData.push({
                     name: 'transactionId',
                     value: details.id
                 });
-                data.push({
+                formData.push({
                     name: 'status',
                     value: details.status
                 });
+                formData.push({
+                    name: 'orderId',
+                    value: data.orderId
+                });
+
                 $.ajax({
                     method: 'post',
                     url: ' <?= Url::toRoute(['/order/pay', 'orderId' => $order->id]) ?>',
