@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\controllers;
 
 use Yii;
@@ -34,6 +35,7 @@ class ProfileController extends Controller
 
     public function actionIndex()
     {
+        /** @var \common\models\user $user */
         $user = Yii::$app->user->identity;
 
         $userAddress = $user->getAddress();
@@ -46,14 +48,16 @@ class ProfileController extends Controller
 
     public function actionUpdateAddress()
     {
-        if(!Yii::$app->request->isAjax){
+        if (!Yii::$app->request->isAjax) {
             throw new ForbiddenHttpException('Why you are here? It is for Ajax requests.');
         }
+
+        /** @var \common\models\user $user */
         $user = Yii::$app->user->identity;
         $userAddress = $user->getAddress();
         $success = false;
 
-        if($userAddress->load(Yii::$app->request->post()) && $userAddress->save()){
+        if ($userAddress->load(Yii::$app->request->post()) && $userAddress->save()) {
             $success = true;
         }
 
@@ -65,10 +69,11 @@ class ProfileController extends Controller
 
     public function actionUpdateAccount()
     {
+        /** @var \common\models\user $user */
         $user = Yii::$app->user->identity;
         $success = false;
 
-        if($user->load(Yii::$app->request->post()) && $user->save()){
+        if ($user->load(Yii::$app->request->post()) && $user->save()) {
             $success = true;
         }
 
@@ -76,6 +81,5 @@ class ProfileController extends Controller
             'user' => $user,
             'success' => $success
         ]);
-
     }
 }

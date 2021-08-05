@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace frontend\base;
 
@@ -9,12 +9,7 @@ class Controller extends BaseController
 {
     public function beforeAction($action)
     {
-
-        if(isGuest()){
-            $this->view->params['cartItemParam'] = CartItem::getTotalQuantityForGuest();
-        }else{
-            $this->view->params['cartItemParam'] = CartItem::getTotalQuantityForUser(auth()->id);
-        }
+        $this->view->params['cartItemParam'] = CartItem::getTotalQuantityForUser();
 
         return parent::beforeAction($action);
     }
